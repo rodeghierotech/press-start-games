@@ -24,8 +24,8 @@ router.get("/", async (req, res) => {
       orderBy: { nome: "asc" },
     })
     res.status(200).json(clientes)
-  } catch (error) {
-    res.status(500).json({ erro: error })
+  } catch {
+    res.status(500).json({ erro: "Não foi possível carregar os clientes" })
   }
 })
 
@@ -50,8 +50,8 @@ router.post("/", async (req, res) => {
       }
     })
     res.status(201).json(cliente)
-  } catch (error) {
-    res.status(400).json({ erro: error })
+  } catch {
+    res.status(400).json({ erro: "Não foi possível cadastrar o cliente" })
   }
 })
 

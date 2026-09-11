@@ -21,15 +21,15 @@ router.get("/", async (req, res) => {
       include: {
         categoria: true,
         avaliacoes: {
-          include: { cliente: true },
+          include: { cliente: { select: { id_cliente: true, nome: true } } },
           orderBy: { data_avaliacao: "desc" },
         },
       },
       orderBy: { nome: "asc" },
     })
     res.status(200).json(jogos)
-  } catch (error) {
-    res.status(500).json({ erro: error })
+  } catch {
+    res.status(500).json({ erro: "Não foi possível carregar os jogos" })
   }
 })
 

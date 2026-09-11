@@ -17,9 +17,9 @@ export default function AuthLogin() {
   async function entrar(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
     setEnviando(true)
+    try {
     const response = await fetch(`${apiUrl}/login`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email, senha }) })
     const dados = await response.json()
-    setEnviando(false)
     if (!response.ok) { toast.error(dados.erro || "Login ou senha incorretos"); return }
     const sessao = JSON.stringify(dados.tipo === "admin"
       ? { id_admin: dados.id_admin, nome: dados.nome, email: dados.email, token: dados.token }
@@ -32,6 +32,11 @@ export default function AuthLogin() {
     armazenamento.setItem(dados.tipo === "admin" ? "press-start-admin" : "press-start-cliente", sessao)
     toast.success("Login realizado")
     navigate(destino, { replace: true })
+    } catch {
+      toast.error("Não foi possível conectar ao serviço de login. Tente novamente.")
+    } finally {
+      setEnviando(false)
+    }
   }
 
   return <AuthShell title="Entrar na Press Start" subtitle="Acesse sua conta para avaliar seus jogos favoritos."><form className="mt-6 space-y-4" onSubmit={entrar}><input type="email" required placeholder="E-mail" value={email} onChange={event => setEmail(event.target.value)} className="auth-input" /><input type="password" required placeholder="Senha" value={senha} onChange={event => setSenha(event.target.value)} className="auth-input" /><label className="flex cursor-pointer items-center gap-2 text-sm text-slate-300"><input type="checkbox" checked={manterConectado} onChange={event => setManterConectado(event.target.checked)} className="h-4 w-4 accent-[#e86a17]" />Manter conectado</label><button type="submit" disabled={enviando} className="auth-primary">{enviando ? "Entrando..." : "Entrar"}</button></form><p className="mt-5 text-center text-sm text-slate-400">Ainda não possui conta? <Link to="/cadastro" state={{ from: destino }} className="font-semibold text-cyan-300 hover:text-cyan-200">Criar conta</Link></p></AuthShell>

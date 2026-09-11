@@ -17,7 +17,7 @@ router.get("/", async (req, res) => {
   try {
     const vendas = await prisma.venda.findMany({
       include: {
-        cliente: true,
+        cliente: { select: { id_cliente: true, nome: true, email: true, telefone: true } },
         itens: {
           include: { jogo: true },
         },
@@ -25,8 +25,8 @@ router.get("/", async (req, res) => {
       orderBy: { data_venda: "desc" },
     })
     res.status(200).json(vendas)
-  } catch (error) {
-    res.status(500).json({ erro: error })
+  } catch {
+    res.status(500).json({ erro: "Não foi possível carregar as vendas" })
   }
 })
 
@@ -79,7 +79,7 @@ router.post("/", async (req, res) => {
           },
         },
         include: {
-          cliente: true,
+          cliente: { select: { id_cliente: true, nome: true, email: true, telefone: true } },
           itens: { include: { jogo: true } },
         },
       })

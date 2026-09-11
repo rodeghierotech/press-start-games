@@ -15,14 +15,14 @@ router.get("/", async (req, res) => {
   try {
     const avaliacoes = await prisma.avaliacao.findMany({
       include: {
-        cliente: true,
+        cliente: { select: { id_cliente: true, nome: true } },
         jogo: true,
       },
       orderBy: { data_avaliacao: "desc" },
     })
     res.status(200).json(avaliacoes)
-  } catch (error) {
-    res.status(500).json({ erro: error })
+  } catch {
+    res.status(500).json({ erro: "Não foi possível carregar as avaliações" })
   }
 })
 
@@ -37,13 +37,13 @@ router.post("/", async (req, res) => {
     const avaliacao = await prisma.avaliacao.create({
       data: valida.data,
       include: {
-        cliente: true,
+        cliente: { select: { id_cliente: true, nome: true } },
         jogo: true,
       },
     })
     res.status(201).json(avaliacao)
-  } catch (error) {
-    res.status(400).json({ erro: error })
+  } catch {
+    res.status(400).json({ erro: "Não foi possível registrar a avaliação" })
   }
 })
 
