@@ -1,0 +1,7 @@
+# Local dependencies and generated output
+**/node_modules/
+**/dist/
+
+# Local environment configuration
+**/.env
+*.local

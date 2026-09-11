@@ -1,0 +1,2 @@
+-- Migration duplicada da criacao de marcas e carros.
+-- O schema ja foi criado pela migration 20260319123505_add_enum_combustiveis.

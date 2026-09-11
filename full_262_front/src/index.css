@@ -1,0 +1,95 @@
+@import url("https://fonts.googleapis.com/css2?family=Orbitron:wght@500;600;700&display=swap");
+@import "tailwindcss";
+
+:root {
+  --orange: #e86a17;
+  --orange-light: #f59e42;
+  --navy: #14213d;
+  --teal: #0f4c5c;
+  --dark: #171717;
+  --cream: #fff7ed;
+  --white: #ffffff;
+  --text: #1c1917;
+  --text-muted: #78716c;
+  font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+  color: var(--text);
+  background: var(--cream);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  min-width: 320px;
+  margin: 0;
+  background: var(--cream);
+}
+
+.brand-font {
+  font-family: "Orbitron", "Arial Narrow", ui-sans-serif, system-ui, sans-serif;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+button:enabled,
+a {
+  cursor: pointer;
+}
+
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid #0891b2;
+  outline-offset: 2px;
+}
+
+::selection {
+  color: #ecfeff;
+  background: #0e7490;
+}
+
+.auth-input {
+  width: 100%;
+  border: 1px solid rgb(51 65 85 / 0.9);
+  border-radius: 0.5rem;
+  background: rgb(2 6 23 / 0.7);
+  padding: 0.75rem 1rem;
+  color: white;
+  outline: none;
+}
+
+.auth-input::placeholder {
+  color: rgb(148 163 184);
+}
+
+.auth-input:focus {
+  border-color: rgb(34 211 238);
+  box-shadow: 0 0 0 1px rgb(34 211 238 / 0.35);
+}
+
+.auth-primary {
+  width: 100%;
+  border-radius: 0.5rem;
+  background: rgb(8 145 178);
+  padding: 0.75rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: white;
+}
+
+.auth-primary:hover {
+  background: rgb(14 116 144);
+}
+
+.auth-primary:disabled {
+  opacity: 0.6;
+}

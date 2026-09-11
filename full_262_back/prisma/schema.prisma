@@ -1,0 +1,92 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Cliente {
+  id_cliente Int         @id @default(autoincrement())
+  nome       String      @db.VarChar(100)
+  email      String      @unique @db.VarChar(100)
+  telefone   String      @db.VarChar(20)
+  senha      String      @db.VarChar(255)
+  vendas     Venda[]
+  avaliacoes Avaliacao[]
+
+  @@map("clientes")
+}
+
+model Admin {
+  id_admin Int    @id @default(autoincrement())
+  nome     String @db.VarChar(100)
+  email    String @unique @db.VarChar(100)
+  senha    String @db.VarChar(255)
+
+  @@map("admins")
+}
+
+model Categoria {
+  id_categoria Int    @id @default(autoincrement())
+  nome         String @unique @db.VarChar(100)
+  jogos        Jogo[]
+
+  @@map("categorias")
+}
+
+model Jogo {
+  id_jogo         Int         @id @default(autoincrement())
+  nome            String      @db.VarChar(100)
+  descricao       String?
+  preco           Decimal     @db.Decimal(10, 2)
+  estoque         Int
+  plataforma      String      @db.VarChar(50)
+  data_lancamento DateTime    @db.Date
+  id_categoria    Int
+  categoria       Categoria   @relation(fields: [id_categoria], references: [id_categoria])
+  itens_venda     ItemVenda[]
+  avaliacoes      Avaliacao[]
+
+  @@map("jogos")
+}
+
+model Venda {
+  id_venda        Int         @id @default(autoincrement())
+  data_venda      DateTime    @default(now())
+  valor_total     Decimal     @db.Decimal(10, 2)
+  forma_pagamento String      @db.VarChar(30)
+  id_cliente      Int
+  cliente         Cliente     @relation(fields: [id_cliente], references: [id_cliente])
+  itens           ItemVenda[]
+
+  @@map("vendas")
+}
+
+model ItemVenda {
+  id_item        Int     @id @default(autoincrement())
+  quantidade     Int
+  preco_unitario Decimal @db.Decimal(10, 2)
+  subtotal       Decimal @db.Decimal(10, 2)
+  id_venda       Int
+  id_jogo        Int
+  venda          Venda   @relation(fields: [id_venda], references: [id_venda], onDelete: Cascade)
+  jogo           Jogo    @relation(fields: [id_jogo], references: [id_jogo])
+
+  @@map("itens_venda")
+}
+
+model Avaliacao {
+  id_avaliacao   Int      @id @default(autoincrement())
+  nota           Int
+  comentario     String?
+  data_avaliacao DateTime @default(now())
+  id_cliente     Int
+  id_jogo        Int
+  cliente        Cliente  @relation(fields: [id_cliente], references: [id_cliente])
+  jogo           Jogo     @relation(fields: [id_jogo], references: [id_jogo])
+
+  @@unique([id_cliente, id_jogo])
+  @@map("avaliacoes")
+}
