@@ -4,6 +4,12 @@ import { Router } from "express"
 import { z } from "zod"
 
 const router = Router()
+let totalConsultasIa = 0
+
+router.get("/metricas/ia", (_req, res) => {
+  res.set("Cache-Control", "no-store")
+  res.json({ totalConsultas: totalConsultasIa })
+})
 
 const jogoSchema = z.object({
   nome: z.string().min(2),
@@ -78,6 +84,7 @@ router.post("/", async (req, res) => {
 })
 
 router.post("/sugestao-ia", async (req, res) => {
+  totalConsultasIa += 1
   const schema = z.object({
     preferencia: z.string().trim().min(8).max(500),
   })

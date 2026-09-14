@@ -27,12 +27,14 @@ function horaRelativa(data: string) {
 }
 
 async function leLista<T>(response: Response, recurso: string): Promise<T[]> {
+  if (!response.ok) throw new Error(`Não foi possível carregar ${recurso} (HTTP ${response.status})`)
   const dados = await response.json()
   if (!response.ok || !Array.isArray(dados)) throw new Error(`Não foi possível carregar ${recurso}`)
   return dados
 }
 
 async function leObjeto<T>(response: Response, recurso: string): Promise<T> {
+  if (!response.ok) throw new Error(`Não foi possível carregar ${recurso} (HTTP ${response.status})`)
   const dados = await response.json()
   if (!response.ok || !dados || typeof dados !== "object" || Array.isArray(dados)) throw new Error(`Não foi possível carregar ${recurso}`)
   return dados as T
@@ -45,7 +47,7 @@ function StatCard({ label, value, detail, icon: Icon, accent }: { label: string;
 export default function AdminDashboard() {
   const navigate = useNavigate()
   const [admin] = useState<{ nome: string } | null>(() => {
-    const sessao = localStorage.getItem("press-start-admin")
+    const sessao = localStorage.getItem("press-start-admin") || sessionStorage.getItem("press-start-admin")
     if (!sessao) return null
     try {
       return JSON.parse(sessao) as { nome: string }
@@ -58,7 +60,7 @@ export default function AdminDashboard() {
   const [clientes, setClientes] = useState<ClienteType[]>([])
   const [vendas, setVendas] = useState<VendaType[]>([])
   const [avaliacoes, setAvaliacoes] = useState<AvaliacaoDashboard[]>([])
-  const [metricasIa, setMetricasIa] = useState<MetricasIa>({ totalConsultas: 0 })
+  const [metricasIa, setMetricasIa] = useState<MetricasIa | null>(null)
   const [carregando, setCarregando] = useState(true)
   const [jogoForm, setJogoForm] = useState<JogoForm>(jogoInicial)
   const [salvandoJogo, setSalvandoJogo] = useState(false)
@@ -73,7 +75,13 @@ export default function AdminDashboard() {
         fetch(`${apiUrl}/vendas`),
         fetch(`${apiUrl}/avaliacoes`),
         fetch(`${apiUrl}/categorias`),
-        fetch(`${apiUrl}/jogos/metricas/ia`),
+        fetch(`${apiUrl}/jogos/metricas/ia`)
+          .then(response => leObjeto<MetricasIa>(response, "as métricas da IA"))
+          .then(dados => {
+            if (!Number.isSafeInteger(dados.totalConsultas) || dados.totalConsultas < 0) return null
+            return dados
+          })
+          .catch(() => null),
       ])
       const [listaJogos, listaClientes, listaVendas, listaAvaliacoes, listaCategorias, dadosMetricasIa] = await Promise.all([
         leLista<JogoType>(respostas[0], "os jogos"),
@@ -81,7 +89,7 @@ export default function AdminDashboard() {
         leLista<VendaType>(respostas[2], "as vendas"),
         leLista<AvaliacaoDashboard>(respostas[3], "as avaliações"),
         leLista<CategoriaType>(respostas[4], "as categorias"),
-        leObjeto<MetricasIa>(respostas[5], "as métricas da IA"),
+        respostas[5],
       ])
       setJogos(listaJogos)
       setClientes(listaClientes)
@@ -89,8 +97,8 @@ export default function AdminDashboard() {
       setAvaliacoes(listaAvaliacoes)
       setCategorias(listaCategorias)
       setMetricasIa(dadosMetricasIa)
-    } catch {
-      toast.error("Não foi possível carregar o dashboard. Verifique se o backend está em execução.")
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Não foi possível carregar o painel. Tente novamente.")
     } finally {
       setCarregando(false)
     }
@@ -155,7 +163,7 @@ export default function AdminDashboard() {
           <StatCard label="Clientes" value={String(clientes.length)} detail="Contas cadastradas" icon={Users} accent="bg-orange-400/15 text-orange-300" />
           <StatCard label="Vendas realizadas" value={String(vendas.length)} detail="Pedidos registrados" icon={ShoppingBag} accent="bg-emerald-400/15 text-emerald-300" />
           <StatCard label="Faturamento" value={moeda(faturamento)} detail="Total acumulado em vendas" icon={CircleDollarSign} accent="bg-violet-400/15 text-violet-300" />
-          <StatCard label="Requisições à IA" value={String(metricasIa.totalConsultas)} detail="Desde a inicialização do servidor" icon={BrainCircuit} accent="bg-orange-400/15 text-orange-300" />
+          <StatCard label="Requisições à IA" value={metricasIa ? String(metricasIa.totalConsultas) : "—"} detail={metricasIa ? "Desde a inicialização do servidor" : carregando ? "Carregando..." : "Métrica indisponível"} icon={BrainCircuit} accent="bg-orange-400/15 text-orange-300" />
         </section>
 
         <Dialog open={modalJogoAberto} onOpenChange={setModalJogoAberto}><DialogContent><DialogHeader><p className="text-xs font-bold uppercase tracking-[0.16em] text-orange-300">Catálogo</p><DialogTitle>Adicionar jogo</DialogTitle><DialogDescription>Cadastre um novo título para disponibilizá-lo na loja.</DialogDescription></DialogHeader><form className="mt-5 grid gap-3 md:grid-cols-2" onSubmit={cadastraJogo}><input className="rounded-lg border border-[#3a3a3a] bg-[#171717] p-3 text-sm text-white placeholder:text-slate-500 outline-none focus:border-orange-400 focus:ring-1 focus:ring-orange-400/30 md:col-span-2" placeholder="Nome do jogo" value={jogoForm.nome} onChange={event => setJogoForm({ ...jogoForm, nome: event.target.value })} required /><input type="text" inputMode="decimal" minLength={1} className="rounded-lg border border-[#3a3a3a] bg-[#171717] p-3 text-sm text-white placeholder:text-slate-500 outline-none focus:border-orange-400 focus:ring-1 focus:ring-orange-400/30" placeholder="Preço (ex.: 199,90)" value={jogoForm.preco} onChange={event => setJogoForm({ ...jogoForm, preco: event.target.value })} required /><input type="number" min="0" className="rounded-lg border border-[#3a3a3a] bg-[#171717] p-3 text-sm text-white placeholder:text-slate-500 outline-none focus:border-orange-400 focus:ring-1 focus:ring-orange-400/30" placeholder="Estoque" value={jogoForm.estoque} onChange={event => setJogoForm({ ...jogoForm, estoque: event.target.value })} required /><input className="rounded-lg border border-[#3a3a3a] bg-[#171717] p-3 text-sm text-white placeholder:text-slate-500 outline-none focus:border-orange-400 focus:ring-1 focus:ring-orange-400/30" placeholder="Plataforma" value={jogoForm.plataforma} onChange={event => setJogoForm({ ...jogoForm, plataforma: event.target.value })} required /><input type="date" className="rounded-lg border border-[#3a3a3a] bg-[#171717] p-3 text-sm text-white outline-none focus:border-orange-400 focus:ring-1 focus:ring-orange-400/30" value={jogoForm.data_lancamento} onChange={event => setJogoForm({ ...jogoForm, data_lancamento: event.target.value })} required /><div className="relative"><select className="w-full appearance-none rounded-lg border border-[#3a3a3a] bg-[#171717] p-3 pr-10 text-sm text-white outline-none focus:border-orange-400 focus:ring-1 focus:ring-orange-400/30" value={jogoForm.id_categoria} onChange={event => setJogoForm({ ...jogoForm, id_categoria: event.target.value })} required><option value="">Selecione a categoria</option>{categorias.map(categoria => <option key={categoria.id_categoria} value={categoria.id_categoria}>{categoria.nome}</option>)}</select><ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" aria-hidden="true" /></div><textarea className="min-h-24 resize-none rounded-lg border border-[#3a3a3a] bg-[#171717] p-3 text-sm text-white placeholder:text-slate-500 outline-none focus:border-orange-400 focus:ring-1 focus:ring-orange-400/30 md:col-span-2" placeholder="Descrição do jogo" value={jogoForm.descricao} onChange={event => setJogoForm({ ...jogoForm, descricao: event.target.value })} /><div className="flex flex-col-reverse gap-2 pt-2 sm:flex-row sm:justify-end md:col-span-2"><button type="button" onClick={() => setModalJogoAberto(false)} className="rounded-lg border border-[#3a3a3a] px-4 py-3 text-sm font-semibold text-slate-200 hover:border-slate-500">Cancelar</button><button type="submit" disabled={salvandoJogo} className="rounded-lg bg-orange-500 px-4 py-3 text-sm font-bold text-white hover:bg-orange-600 disabled:opacity-60">{salvandoJogo ? "Cadastrando..." : "Adicionar jogo"}</button></div></form></DialogContent></Dialog>

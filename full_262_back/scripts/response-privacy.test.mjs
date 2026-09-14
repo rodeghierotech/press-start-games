@@ -19,6 +19,19 @@ app.use("/vendas", vendas)
 const server = app.listen(0, "127.0.0.1")
 await once(server, "listening")
 const baseUrl = `http://127.0.0.1:${server.address().port}`
+test("AI metrics return JSON and count received requests without querying the provider", async () => {
+  const before = await fetch(`${baseUrl}/jogos/metricas/ia`)
+  assert.equal(before.status, 200)
+  assert.equal(before.headers.get("cache-control"), "no-store")
+  const initial = await before.json()
+  assert.equal(initial.totalConsultas, 0)
+  const rejected = await fetch(`${baseUrl}/jogos/sugestao-ia`, {
+    method: "POST", headers: { "Content-Type": "application/json" }, body: "{}",
+  })
+  assert.equal(rejected.status, 400)
+  const afterRequest = await fetch(`${baseUrl}/jogos/metricas/ia`)
+  assert.deepEqual(await afterRequest.json(), { totalConsultas: 1 })
+})
 after(async () => {
   server.closeAllConnections()
   await new Promise(resolve => server.close(resolve))
