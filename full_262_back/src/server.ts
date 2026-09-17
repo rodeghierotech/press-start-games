@@ -1,5 +1,6 @@
 import express from "express"
 import cors from "cors"
+import swaggerUi from "swagger-ui-express"
 
 import routesAvaliacoes from "./routes/avaliacoes"
 import routesCategorias from "./routes/categorias"
@@ -7,12 +8,14 @@ import routesClientes from "./routes/clientes"
 import routesJogos from "./routes/jogos"
 import routesLogin from "./routes/login"
 import routesVendas from "./routes/vendas"
+import { openapiDocument } from "./docs/openapi"
 
 const app = express()
 const port = 3000
 
 app.use(express.json())
 app.use(cors())
+app.use("/docs", swaggerUi.serve, swaggerUi.setup(openapiDocument))
 
 app.use("/avaliacoes", routesAvaliacoes)
 app.use("/categorias", routesCategorias)
