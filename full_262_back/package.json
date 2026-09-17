@@ -2,7 +2,6 @@
   "name": "back1",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
   "scripts": {
     "dev": "npx tsx watch src/server.ts",
     "db:test": "tsx scripts/test-db.ts",

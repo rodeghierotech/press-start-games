@@ -1,20 +1,14 @@
-import React, { useEffect, useRef } from "react"
+import { useEffect, useRef } from "react"
 
 interface NoiseProps {
-  patternSize?: number
-  patternScaleX?: number
-  patternScaleY?: number
   patternRefreshInterval?: number
   patternAlpha?: number
 }
 
-const Noise: React.FC<NoiseProps> = ({
-  patternSize = 250,
-  patternScaleX = 1,
-  patternScaleY = 1,
+const Noise = ({
   patternRefreshInterval = 2,
   patternAlpha = 15,
-}) => {
+}: NoiseProps) => {
   const grainRef = useRef<HTMLCanvasElement | null>(null)
 
   useEffect(() => {
@@ -62,7 +56,7 @@ const Noise: React.FC<NoiseProps> = ({
       window.removeEventListener("resize", resize)
       window.cancelAnimationFrame(animationId)
     }
-  }, [patternSize, patternScaleX, patternScaleY, patternRefreshInterval, patternAlpha])
+  }, [patternRefreshInterval, patternAlpha])
 
   return <canvas ref={grainRef} className="pointer-events-none absolute inset-0" style={{ imageRendering: "pixelated" }} />
 }

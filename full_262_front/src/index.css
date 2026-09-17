@@ -2,15 +2,8 @@
 @import "tailwindcss";
 
 :root {
-  --orange: #e86a17;
-  --orange-light: #f59e42;
-  --navy: #14213d;
-  --teal: #0f4c5c;
-  --dark: #171717;
   --cream: #fff7ed;
-  --white: #ffffff;
   --text: #1c1917;
-  --text-muted: #78716c;
   font-family: Inter, ui-sans-serif, system-ui, sans-serif;
   color: var(--text);
   background: var(--cream);
