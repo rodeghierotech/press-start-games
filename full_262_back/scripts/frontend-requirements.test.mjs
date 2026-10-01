@@ -32,6 +32,18 @@ test("game interactions send the stored JWT as a bearer token", async () => {
   assert.doesNotMatch(details, /body:\s*JSON\.stringify\(\{\s*id_cliente/)
 })
 
+test("game details guides an authenticated administrator to the customer login", async () => {
+  const [details, session] = await Promise.all([
+    source("GameDetails.tsx"),
+    source("utils", "sessao.ts"),
+  ])
+
+  assert.match(details, /sessaoAdmin/)
+  assert.match(details, /Você está conectado como administrador/)
+  assert.match(details, /Entrar como cliente/)
+  assert.match(session, /encerrarSessaoAdmin/)
+})
+
 test("dashboard authenticates administrative requests and offers a review response action", async () => {
   const dashboard = await source("AdminDashboard.tsx")
   assert.match(dashboard, /cabecalhoAutorizacao\(admin\.token\)/)

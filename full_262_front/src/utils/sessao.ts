@@ -32,6 +32,11 @@ export function sessaoAdmin() {
   return leSessao<SessaoAdmin>("press-start-admin")
 }
 
+export function encerrarSessaoAdmin() {
+  localStorage.removeItem("press-start-admin")
+  sessionStorage.removeItem("press-start-admin")
+}
+
 export function cabecalhoAutorizacao(token?: string): HeadersInit {
   return token ? { Authorization: `Bearer ${token}` } : {}
 }
