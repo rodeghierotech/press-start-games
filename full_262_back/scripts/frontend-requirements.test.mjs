@@ -50,3 +50,12 @@ test("dashboard authenticates administrative requests and offers a review respon
   assert.match(dashboard, /Responder/)
   assert.match(dashboard, /avaliacoes\/\$\{avaliacaoRespondida\.id_avaliacao\}\/resposta/)
 })
+
+test("dashboard lists available games with their administrative details", async () => {
+  const dashboard = await source("AdminDashboard.tsx")
+
+  assert.match(dashboard, /Jogos disponíveis/)
+  assert.match(dashboard, /Categoria/)
+  assert.match(dashboard, /Destaque/)
+  assert.match(dashboard, /Nenhum jogo cadastrado/)
+})

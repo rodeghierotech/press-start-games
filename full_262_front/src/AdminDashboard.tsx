@@ -206,6 +206,22 @@ export default function AdminDashboard() {
 
           <article className="rounded-xl border border-slate-700/80 bg-slate-900/70 p-5 backdrop-blur-md"><div className="flex items-center justify-between"><div><h2 className="font-bold">Avaliações recentes</h2><p className="mt-1 text-sm text-slate-400">Opinião dos clientes sobre os jogos.</p></div><Star className="h-5 w-5 text-yellow-300" /></div><div className="mt-5 space-y-4">{avaliacoes.slice(0, 4).map(avaliacao => <div key={avaliacao.id_avaliacao} className="border-b border-slate-800 pb-3 last:border-0 last:pb-0"><div className="flex justify-between gap-3"><p className="truncate text-sm font-semibold">{avaliacao.jogo.nome}</p><span className="shrink-0 text-sm text-yellow-300">{avaliacao.nota}/5</span></div><p className="mt-1 text-xs text-slate-500">por {avaliacao.cliente.nome} · {dataPtBr(avaliacao.data_avaliacao)}</p>{avaliacao.comentario && <p className="mt-2 line-clamp-2 text-sm text-slate-300">{avaliacao.comentario}</p>}{avaliacao.resposta ? <p className="mt-3 border-l-2 border-orange-300 pl-3 text-xs text-orange-100">Resposta: {avaliacao.resposta.mensagem}</p> : <button type="button" onClick={() => { setAvaliacaoRespondida(avaliacao); setMensagemResposta("") }} className="mt-3 text-sm font-semibold text-orange-300 hover:text-orange-200">Responder</button>}</div>)}{avaliacoes.length === 0 && <p className="py-6 text-sm text-slate-500">Nenhuma avaliação registrada.</p>}</div></article>
         </section>
+
+        <section className="mt-6" aria-labelledby="titulo-jogos-disponiveis">
+          <article className="overflow-hidden rounded-xl border border-slate-700/80 bg-slate-900/70 backdrop-blur-md">
+            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-700/70 px-5 py-4">
+              <div><h2 id="titulo-jogos-disponiveis" className="font-bold">Jogos disponíveis</h2><p className="mt-1 text-sm text-slate-400">Lista completa do catálogo para acompanhamento do estoque.</p></div>
+              <span className="rounded-full bg-cyan-400/15 px-2.5 py-1 text-xs font-bold text-cyan-300">{jogos.length} títulos</span>
+            </div>
+            <div className="overflow-x-auto">
+              <div className="min-w-[780px]">
+                <div className="grid grid-cols-[minmax(180px,1.5fr)_120px_130px_100px_90px_100px] gap-3 border-b border-slate-700/70 px-5 py-3 text-[11px] font-bold uppercase tracking-wide text-slate-500"><span>Jogo</span><span>Categoria</span><span>Plataforma</span><span>Preço</span><span>Estoque</span><span>Destaque</span></div>
+                {jogos.map(jogo => <div key={jogo.id_jogo} className="grid grid-cols-[minmax(180px,1.5fr)_120px_130px_100px_90px_100px] items-center gap-3 border-b border-slate-800 px-5 py-4 text-sm last:border-0"><div className="min-w-0"><p className="truncate font-semibold text-white">{jogo.nome}</p><p className={jogo.estoque > 0 ? "mt-1 text-xs text-emerald-300" : "mt-1 text-xs text-rose-300"}>{jogo.estoque > 0 ? "Disponível" : "Indisponível"}</p></div><span className="truncate text-slate-300">{jogo.categoria.nome}</span><span className="truncate text-slate-300">{jogo.plataforma}</span><span className="font-semibold text-orange-300">{moeda(Number(jogo.preco))}</span><span className="font-semibold text-slate-200">{jogo.estoque} un.</span><span className={jogo.destaque ? "w-fit rounded-full bg-orange-400/15 px-2.5 py-1 text-xs font-bold text-orange-200" : "text-xs text-slate-500"}>{jogo.destaque ? "Sim" : "Não"}</span></div>)}
+                {jogos.length === 0 && <p className="px-5 py-10 text-center text-sm text-slate-500">Nenhum jogo cadastrado.</p>}
+              </div>
+            </div>
+          </article>
+        </section>
       </div>
     </main>
   </>
