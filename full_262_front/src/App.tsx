@@ -59,6 +59,18 @@ export default function App() {
   }, [jogos, termo])
 
   const jogosDestaque = useMemo(() => jogos.filter(jogo => jogo.destaque), [jogos])
+  const jogosMaisRecentes = useMemo(() => [...jogos].sort((a, b) => b.id_jogo - a.id_jogo).slice(0, 3), [jogos])
+  const jogosMaisAvaliados = useMemo(() => {
+    const media = (jogo: JogoType) => {
+      const avaliacoes = jogo.avaliacoes || []
+      return avaliacoes.reduce((total, avaliacao) => total + avaliacao.nota, 0) / avaliacoes.length
+    }
+
+    return jogos
+      .filter(jogo => (jogo.avaliacoes?.length || 0) > 0)
+      .sort((a, b) => media(b) - media(a) || (b.avaliacoes?.length || 0) - (a.avaliacoes?.length || 0))
+      .slice(0, 3)
+  }, [jogos])
 
   async function consultaIa() {
     if (preferenciaIa.trim().length < 8) {
@@ -108,6 +120,28 @@ export default function App() {
             <p className="text-sm text-slate-300">{jogosDestaque.length} jogos selecionados</p>
           </div>
           <div className="mt-5"><GameGrid jogos={jogosDestaque} /></div>
+        </section>}
+
+        {!somenteDestaques && jogosMaisRecentes.length > 0 && <section className="mt-10" aria-labelledby="titulo-recentes">
+          <div className="flex flex-wrap items-end justify-between gap-3">
+            <div>
+              <p className="text-xs font-bold uppercase tracking-[0.16em] text-cyan-300">Novidades no catálogo</p>
+              <h2 id="titulo-recentes" className="mt-2 text-2xl font-bold text-white">Últimos cadastrados</h2>
+            </div>
+            <p className="text-sm text-slate-300">Adicionados recentemente</p>
+          </div>
+          <div className="mt-5"><GameGrid jogos={jogosMaisRecentes} /></div>
+        </section>}
+
+        {!somenteDestaques && jogosMaisAvaliados.length > 0 && <section className="mt-10" aria-labelledby="titulo-avaliados">
+          <div className="flex flex-wrap items-end justify-between gap-3">
+            <div>
+              <p className="text-xs font-bold uppercase tracking-[0.16em] text-orange-300">Opinião dos clientes</p>
+              <h2 id="titulo-avaliados" className="mt-2 text-2xl font-bold text-white">Melhor avaliados</h2>
+            </div>
+            <p className="text-sm text-slate-300">Ordenados pela média de notas</p>
+          </div>
+          <div className="mt-5"><GameGrid jogos={jogosMaisAvaliados} /></div>
         </section>}
 
         <section id="catalogo" className="mt-8">

@@ -15,6 +15,15 @@ test("home displays featured games independently from the full catalog", async (
   assert.match(app, /<GameGrid jogos=\{jogosDestaque\}/)
 })
 
+test("home highlights the newest and best rated catalog entries", async () => {
+  const app = await readFile(path.join(frontRoot, "App.tsx"), "utf8")
+
+  assert.match(app, /const jogosMaisRecentes = useMemo/)
+  assert.match(app, /const jogosMaisAvaliados = useMemo/)
+  assert.match(app, /Últimos cadastrados/)
+  assert.match(app, /Melhor avaliados/)
+})
+
 test("seed catalog includes twenty real games and at least five featured games", async () => {
   const seed = await readFile(path.join(backRoot, "prisma", "seed.ts"), "utf8")
   const gameNames = [
