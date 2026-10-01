@@ -2,10 +2,12 @@ import assert from "node:assert/strict"
 import { once } from "node:events"
 import { after, test } from "node:test"
 import express from "express"
+import jwt from "jsonwebtoken"
 
 // Route tests use a disconnected Prisma client; no database or AI calls are made.
 process.env.DATABASE_URL = "postgresql://test:test@127.0.0.1:1/test"
 process.env.GEMINI_API_KEY = ""
+process.env.JWT_KEY = "test-secret"
 const { prisma } = await import("../lib/prisma.ts")
 const { default: jogos } = await import("../src/routes/jogos.ts")
 const { default: avaliacoes } = await import("../src/routes/avaliacoes.ts")
@@ -19,8 +21,12 @@ app.use("/vendas", vendas)
 const server = app.listen(0, "127.0.0.1")
 await once(server, "listening")
 const baseUrl = `http://127.0.0.1:${server.address().port}`
+const tokenAdmin = jwt.sign({ adminLogadoId: 1, adminLogadoNome: "Admin teste" }, process.env.JWT_KEY)
+const tokenCliente = jwt.sign({ clienteLogadoId: 1, clienteLogadoNome: "Cliente teste" }, process.env.JWT_KEY)
+const authAdmin = { Authorization: `Bearer ${tokenAdmin}` }
+const authCliente = { Authorization: `Bearer ${tokenCliente}` }
 test("AI metrics return JSON and count received requests without querying the provider", async () => {
-  const before = await fetch(`${baseUrl}/jogos/metricas/ia`)
+  const before = await fetch(`${baseUrl}/jogos/metricas/ia`, { headers: authAdmin })
   assert.equal(before.status, 200)
   assert.equal(before.headers.get("cache-control"), "no-store")
   const initial = await before.json()
@@ -29,7 +35,7 @@ test("AI metrics return JSON and count received requests without querying the pr
     method: "POST", headers: { "Content-Type": "application/json" }, body: "{}",
   })
   assert.equal(rejected.status, 400)
-  const afterRequest = await fetch(`${baseUrl}/jogos/metricas/ia`)
+  const afterRequest = await fetch(`${baseUrl}/jogos/metricas/ia`, { headers: authAdmin })
   assert.deepEqual(await afterRequest.json(), { totalConsultas: 1 })
 })
 after(async () => {
@@ -55,10 +61,10 @@ function selectedCliente(relation, expectedFields) {
 
 const cases = [
   { path: "/jogos", model: "jogo", method: "findMany", fields: publicFields, nested: true },
-  { path: "/avaliacoes", model: "avaliacao", method: "findMany", fields: publicFields },
-  { path: "/avaliacoes", model: "avaliacao", method: "create", fields: publicFields, body: { nota: 5, id_cliente: 1, id_jogo: 1 } },
-  { path: "/vendas", model: "venda", method: "findMany", fields: salesFields },
-  { path: "/vendas", model: "venda", method: "create", fields: salesFields, body: { id_cliente: 1, forma_pagamento: "PIX", itens: [{ id_jogo: 1, quantidade: 1 }] } },
+  { path: "/avaliacoes", model: "avaliacao", method: "findMany", fields: publicFields, headers: authAdmin },
+  { path: "/avaliacoes", model: "avaliacao", method: "create", fields: publicFields, headers: authCliente, body: { nota: 5, id_jogo: 1 } },
+  { path: "/vendas", model: "venda", method: "findMany", fields: salesFields, headers: authAdmin },
+  { path: "/vendas", model: "venda", method: "create", fields: salesFields, headers: authCliente, body: { forma_pagamento: "PIX", itens: [{ id_jogo: 1, quantidade: 1 }] } },
 ]
 
 for (const scenario of cases) {
@@ -81,7 +87,7 @@ for (const scenario of cases) {
     }
     const response = await fetch(`${baseUrl}${scenario.path}`, {
       method: scenario.body ? "POST" : "GET",
-      ...(scenario.body ? { headers: { "Content-Type": "application/json" }, body: JSON.stringify(scenario.body) } : {}),
+      ...(scenario.body ? { headers: { "Content-Type": "application/json", ...scenario.headers }, body: JSON.stringify(scenario.body) } : scenario.headers ? { headers: scenario.headers } : {}),
     })
     const body = await response.text()
     assert.equal(response.status, scenario.body ? 201 : 200, body)
@@ -97,8 +103,8 @@ test("database failures do not expose internal data in public responses", async 
     throw { message: "Database error", senha: cliente.senha }
   })
   const response = await fetch(`${baseUrl}/avaliacoes`, {
-    method: "POST", headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ nota: 5, id_cliente: 1, id_jogo: 1 }),
+    method: "POST", headers: { "Content-Type": "application/json", ...authCliente },
+    body: JSON.stringify({ nota: 5, id_jogo: 1 }),
   })
   assert.equal(response.status, 400)
   assert.deepEqual(await response.json(), { erro: "Não foi possível registrar a avaliação" })

@@ -1,5 +1,6 @@
 import bcrypt from "bcrypt"
 import { prisma } from "../../lib/prisma"
+import { autenticar, exigirAdmin, exigirCliente } from "../middlewares/auth"
 import { Router } from "express"
 import { z } from "zod"
 
@@ -12,7 +13,47 @@ const clienteSchema = z.object({
   senha: z.string().min(6, { message: "Senha deve possuir, no minimo, 6 caracteres" }),
 })
 
-router.get("/", async (req, res) => {
+router.get("/me/interacoes", autenticar, exigirCliente, async (req, res) => {
+  try {
+    const cliente = await prisma.cliente.findUnique({
+      where: { id_cliente: req.usuario!.id },
+      select: {
+        id_cliente: true,
+        nome: true,
+        email: true,
+        telefone: true,
+        vendas: {
+          include: {
+            itens: {
+              include: { jogo: { include: { categoria: true } } },
+            },
+          },
+          orderBy: { data_venda: "desc" },
+        },
+        avaliacoes: {
+          include: {
+            jogo: { include: { categoria: true } },
+            resposta: {
+              include: { admin: { select: { id_admin: true, nome: true } } },
+            },
+          },
+          orderBy: { data_avaliacao: "desc" },
+        },
+      },
+    })
+
+    if (!cliente) {
+      res.status(404).json({ erro: "Cliente não encontrado" })
+      return
+    }
+
+    res.status(200).json(cliente)
+  } catch {
+    res.status(500).json({ erro: "Não foi possível carregar suas interações" })
+  }
+})
+
+router.get("/", autenticar, exigirAdmin, async (req, res) => {
   try {
     const clientes = await prisma.cliente.findMany({
       select: {

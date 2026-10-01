@@ -1,12 +1,13 @@
 import { prisma } from "../../lib/prisma"
 import { sugerirJogoComGemini } from "../../services/iaServices"
+import { autenticar, exigirAdmin } from "../middlewares/auth"
 import { Router } from "express"
 import { z } from "zod"
 
 const router = Router()
 let totalConsultasIa = 0
 
-router.get("/metricas/ia", (_req, res) => {
+router.get("/metricas/ia", autenticar, exigirAdmin, (_req, res) => {
   res.set("Cache-Control", "no-store")
   res.json({ totalConsultas: totalConsultasIa })
 })
@@ -18,12 +19,14 @@ const jogoSchema = z.object({
   estoque: z.coerce.number().int().min(0),
   plataforma: z.string().min(2),
   data_lancamento: z.string().date(),
+  destaque: z.coerce.boolean().optional().default(false),
   id_categoria: z.coerce.number().int(),
 })
 
 router.get("/", async (req, res) => {
   try {
     const jogos = await prisma.jogo.findMany({
+      where: req.query.destaques === "true" ? { destaque: true } : undefined,
       include: {
         categoria: true,
         avaliacoes: {
@@ -55,12 +58,12 @@ router.get("/pesquisa/:termo", async (req, res) => {
       orderBy: { nome: "asc" },
     })
     res.status(200).json(jogos)
-  } catch (error) {
-    res.status(500).json({ erro: error })
+  } catch {
+    res.status(500).json({ erro: "Não foi possível pesquisar os jogos" })
   }
 })
 
-router.post("/", async (req, res) => {
+router.post("/", autenticar, exigirAdmin, async (req, res) => {
   const valida = jogoSchema.safeParse(req.body)
   if (!valida.success) {
     res.status(400).json({ erro: valida.error })
@@ -78,8 +81,8 @@ router.post("/", async (req, res) => {
       include: { categoria: true },
     })
     res.status(201).json(jogo)
-  } catch (error) {
-    res.status(400).json({ erro: error })
+  } catch {
+    res.status(400).json({ erro: "Não foi possível cadastrar o jogo" })
   }
 })
 
@@ -110,8 +113,8 @@ router.post("/sugestao-ia", async (req, res) => {
     })
 
     res.status(200).json({ sugestao })
-  } catch (error) {
-    res.status(500).json({ erro: "Nao foi possivel consultar a IA", detalhes: error })
+  } catch {
+    res.status(500).json({ erro: "Não foi possível consultar a IA" })
   }
 })
 

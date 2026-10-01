@@ -2,6 +2,7 @@ import { useEffect, useState } from "react"
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom"
 import { toast } from "sonner"
 import type { JogoType } from "./utils/LojaJogosTypes"
+import { cabecalhoAutorizacao, sessaoCliente } from "./utils/sessao"
 import NoiseBackground from "./components/ui/background-snippets-noise-effect11"
 import GameRating from "./components/ui/rating-group"
 
@@ -20,10 +21,7 @@ export default function GameDetails() {
   const navigate = useNavigate()
   const location = useLocation()
   const [jogo, setJogo] = useState<JogoType | null>(null)
-  const [clienteLogado] = useState<{ id_cliente: number; nome: string } | null>(() => {
-    const sessao = localStorage.getItem("press-start-cliente") || sessionStorage.getItem("press-start-cliente")
-    return sessao ? JSON.parse(sessao) as { id_cliente: number; nome: string } : null
-  })
+  const [clienteLogado] = useState(sessaoCliente)
   const [quantidade, setQuantidade] = useState("1")
   const [pagamento, setPagamento] = useState("PIX")
   const [compraAberta, setCompraAberta] = useState(false)
@@ -57,9 +55,8 @@ export default function GameDetails() {
 
     const response = await fetch(`${apiUrl}/vendas`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", ...cabecalhoAutorizacao(clienteLogado.token) },
       body: JSON.stringify({
-        id_cliente: clienteLogado.id_cliente,
         forma_pagamento: pagamento,
         itens: [{ id_jogo: jogo.id_jogo, quantidade }],
       }),
@@ -85,8 +82,8 @@ export default function GameDetails() {
 
     const response = await fetch(`${apiUrl}/avaliacoes`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id_cliente: clienteLogado.id_cliente, id_jogo: jogo.id_jogo, nota, comentario }),
+      headers: { "Content-Type": "application/json", ...cabecalhoAutorizacao(clienteLogado.token) },
+      body: JSON.stringify({ id_jogo: jogo.id_jogo, nota, comentario }),
     })
     if (!response.ok) {
       const dados = await response.json()

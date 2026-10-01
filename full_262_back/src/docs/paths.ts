@@ -21,10 +21,12 @@ export const paths = {
   "/avaliacoes": {
     get: {
       summary: "Lista avaliações",
+      security: [{ bearerAuth: [] }],
       responses: { 200: response("Avaliações encontradas", arrayOf("Avaliacao")), 500: errorResponse("Falha ao carregar avaliações") },
     },
     post: {
       summary: "Registra uma avaliação",
+      security: [{ bearerAuth: [] }],
       requestBody: { required: true, ...json(ref("AvaliacaoInput")) },
       responses: { 201: response("Avaliação registrada", ref("Avaliacao")), 400: errorResponse("Dados inválidos ou avaliação não registrada") },
     },
@@ -43,6 +45,7 @@ export const paths = {
   "/clientes": {
     get: {
       summary: "Lista clientes sem expor senhas",
+      security: [{ bearerAuth: [] }],
       responses: { 200: response("Clientes encontrados", arrayOf("Cliente")), 500: errorResponse("Falha ao carregar clientes") },
     },
     post: {
@@ -51,13 +54,22 @@ export const paths = {
       responses: { 201: response("Cliente criado", ref("Cliente")), 400: errorResponse("Dados inválidos ou cliente não criado") },
     },
   },
+  "/clientes/me/interacoes": {
+    get: {
+      summary: "Lista compras, avaliações e respostas do cliente autenticado",
+      security: [{ bearerAuth: [] }],
+      responses: { 200: response("Interações encontradas", { type: "object", additionalProperties: true }), 401: errorResponse("Sessão inválida") },
+    },
+  },
   "/jogos": {
     get: {
       summary: "Lista jogos com categorias e avaliações",
+      parameters: [{ name: "destaques", in: "query", required: false, schema: { type: "boolean" }, description: "Quando true, retorna somente jogos destacados." }],
       responses: { 200: response("Jogos encontrados", arrayOf("Jogo")), 500: errorResponse("Falha ao carregar jogos") },
     },
     post: {
       summary: "Cadastra um jogo",
+      security: [{ bearerAuth: [] }],
       requestBody: { required: true, ...json(ref("JogoInput")) },
       responses: { 201: response("Jogo criado", ref("Jogo")), 400: errorResponse("Dados inválidos ou jogo não criado") },
     },
@@ -65,7 +77,17 @@ export const paths = {
   "/jogos/metricas/ia": {
     get: {
       summary: "Consulta a quantidade de solicitações à IA",
+      security: [{ bearerAuth: [] }],
       responses: { 200: response("Métrica retornada", { type: "object", properties: { totalConsultas: { type: "integer", example: 3 } }, required: ["totalConsultas"] }) },
+    },
+  },
+  "/avaliacoes/{id_avaliacao}/resposta": {
+    post: {
+      summary: "Cria ou atualiza a resposta administrativa de uma avaliação",
+      security: [{ bearerAuth: [] }],
+      parameters: [{ name: "id_avaliacao", in: "path", required: true, schema: { type: "integer" } }],
+      requestBody: { required: true, ...json(ref("RespostaAvaliacaoInput")) },
+      responses: { 201: response("Resposta registrada", ref("RespostaAvaliacao")), 400: errorResponse("Dados inválidos"), 401: errorResponse("Sessão inválida"), 403: errorResponse("Acesso restrito") },
     },
   },
   "/jogos/pesquisa/{termo}": {
@@ -109,10 +131,12 @@ export const paths = {
   "/vendas": {
     get: {
       summary: "Lista vendas com cliente e itens",
+      security: [{ bearerAuth: [] }],
       responses: { 200: response("Vendas encontradas", { type: "array", items: { type: "object", additionalProperties: true } }), 500: errorResponse("Falha ao carregar vendas") },
     },
     post: {
       summary: "Registra uma venda e atualiza o estoque",
+      security: [{ bearerAuth: [] }],
       requestBody: { required: true, ...json(ref("VendaInput")) },
       responses: { 201: response("Venda registrada", { type: "object", additionalProperties: true }), 400: errorResponse("Dados inválidos, jogo inexistente ou estoque insuficiente") },
     },

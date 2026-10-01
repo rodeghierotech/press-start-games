@@ -55,6 +55,7 @@ export const schemas = {
       estoque: { type: "integer", example: 10 },
       plataforma: { type: "string", example: "Nintendo Switch" },
       data_lancamento: { type: "string", format: "date-time", example: "2023-05-12T00:00:00.000Z" },
+      destaque: { type: "boolean", example: true },
       id_categoria: { type: "integer", example: 1 },
       jogos: { type: "array", items: { $ref: "#/components/schemas/Jogo" } },
       categoria: { $ref: "#/components/schemas/Categoria" },
@@ -71,6 +72,7 @@ export const schemas = {
       estoque: { type: "integer", minimum: 0, example: 10 },
       plataforma: { type: "string", minLength: 2, example: "Nintendo Switch" },
       data_lancamento: { type: "string", format: "date", example: "2023-05-12" },
+      destaque: { type: "boolean", example: false },
       id_categoria: { type: "integer", example: 1 },
     },
     required: ["nome", "preco", "estoque", "plataforma", "data_lancamento", "id_categoria"],
@@ -94,10 +96,23 @@ export const schemas = {
     properties: {
       nota: { type: "integer", minimum: 1, maximum: 5, example: 5 },
       comentario: { type: "string", nullable: true, example: "Excelente jogo" },
-      id_cliente: { type: "integer", example: 1 },
       id_jogo: { type: "integer", example: 1 },
     },
-    required: ["nota", "id_cliente", "id_jogo"],
+    required: ["nota", "id_jogo"],
+  },
+  RespostaAvaliacao: {
+    type: "object",
+    properties: {
+      id_resposta: { type: "integer", example: 1 },
+      mensagem: { type: "string", example: "Obrigado pelo seu retorno." },
+      data_resposta: { type: "string", format: "date-time" },
+    },
+    required: ["id_resposta", "mensagem", "data_resposta"],
+  },
+  RespostaAvaliacaoInput: {
+    type: "object",
+    properties: { mensagem: { type: "string", minLength: 2, maxLength: 1000, example: "Obrigado pelo seu retorno." } },
+    required: ["mensagem"],
   },
   ItemVendaInput: {
     type: "object",
@@ -110,11 +125,10 @@ export const schemas = {
   VendaInput: {
     type: "object",
     properties: {
-      id_cliente: { type: "integer", example: 1 },
       forma_pagamento: { type: "string", minLength: 2, example: "Cartão" },
       itens: { type: "array", minItems: 1, items: { $ref: "#/components/schemas/ItemVendaInput" } },
     },
-    required: ["id_cliente", "forma_pagamento", "itens"],
+    required: ["forma_pagamento", "itens"],
   },
   LoginInput: {
     type: "object",

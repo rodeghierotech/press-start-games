@@ -15,6 +15,7 @@ const rotas = createBrowserRouter([
       { path: "jogos/:id", lazy: async () => ({ Component: (await import("./GameDetails.tsx")).default }) },
       { path: "login", lazy: async () => ({ Component: (await import("./AuthLogin.tsx")).default }) },
       { path: "cadastro", lazy: async () => ({ Component: (await import("./AuthRegister.tsx")).default }) },
+      { path: "minha-conta", lazy: async () => ({ Component: (await import("./CustomerAccount.tsx")).default }) },
       { path: "admin", lazy: async () => ({ Component: (await import("./AdminDashboard.tsx")).default }) },
       { path: "*", lazy: async () => ({ Component: (await import("./NotFound.tsx")).default }) },
     ],

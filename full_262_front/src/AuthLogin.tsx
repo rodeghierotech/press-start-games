@@ -23,7 +23,7 @@ export default function AuthLogin() {
     if (!response.ok) { toast.error(dados.erro || "Login ou senha incorretos"); return }
     const sessao = JSON.stringify(dados.tipo === "admin"
       ? { id_admin: dados.id_admin, nome: dados.nome, email: dados.email, token: dados.token }
-      : { id_cliente: dados.id_cliente, nome: dados.nome, email: dados.email, token: dados.token })
+      : { id_cliente: dados.id_cliente, nome: dados.nome, email: dados.email, token: dados.token, sessao_id: dados.sessao_id })
     localStorage.removeItem("press-start-cliente")
     sessionStorage.removeItem("press-start-cliente")
     localStorage.removeItem("press-start-admin")

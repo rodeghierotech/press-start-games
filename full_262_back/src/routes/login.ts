@@ -34,7 +34,7 @@ router.post("/", async (req, res) => {
     const token = jwt.sign(payload, chave, { expiresIn: "1h" })
     res.json({
       tipo: admin ? "admin" : "cliente",
-      ...(admin ? { id_admin: admin.id_admin } : { id_cliente: cliente!.id_cliente }),
+      ...(admin ? { id_admin: admin.id_admin } : { id_cliente: cliente!.id_cliente, sessao_id: cliente!.sessao_id }),
       nome: conta.nome,
       email: conta.email,
       token,

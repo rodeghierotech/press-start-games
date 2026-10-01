@@ -13,6 +13,7 @@ model Cliente {
   email      String      @unique @db.VarChar(100)
   telefone   String      @db.VarChar(20)
   senha      String      @db.VarChar(255)
+  sessao_id  String      @unique @default(uuid()) @db.Uuid
   vendas     Venda[]
   avaliacoes Avaliacao[]
 
@@ -24,6 +25,7 @@ model Admin {
   nome     String @db.VarChar(100)
   email    String @unique @db.VarChar(100)
   senha    String @db.VarChar(255)
+  respostas RespostaAvaliacao[]
 
   @@map("admins")
 }
@@ -44,6 +46,7 @@ model Jogo {
   estoque         Int
   plataforma      String      @db.VarChar(50)
   data_lancamento DateTime    @db.Date
+  destaque        Boolean     @default(false)
   id_categoria    Int
   categoria       Categoria   @relation(fields: [id_categoria], references: [id_categoria])
   itens_venda     ItemVenda[]
@@ -86,7 +89,20 @@ model Avaliacao {
   id_jogo        Int
   cliente        Cliente  @relation(fields: [id_cliente], references: [id_cliente])
   jogo           Jogo     @relation(fields: [id_jogo], references: [id_jogo])
+  resposta       RespostaAvaliacao?
 
   @@unique([id_cliente, id_jogo])
   @@map("avaliacoes")
+}
+
+model RespostaAvaliacao {
+  id_resposta   Int       @id @default(autoincrement())
+  mensagem      String    @db.Text
+  data_resposta DateTime  @default(now())
+  id_avaliacao  Int       @unique
+  id_admin      Int
+  avaliacao     Avaliacao @relation(fields: [id_avaliacao], references: [id_avaliacao], onDelete: Cascade)
+  admin         Admin     @relation(fields: [id_admin], references: [id_admin])
+
+  @@map("respostas_avaliacao")
 }

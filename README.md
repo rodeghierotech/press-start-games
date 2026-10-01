@@ -1,4 +1,4 @@
-## Administradores
+#Administradores
 
 E-mail - Senha:
 
@@ -6,7 +6,7 @@ admin@lojajogos.com        - Admin@123
 paula.admin@pressstart.com - Admin@123 
 lucas.admin@pressstart.com - Admin@123 
 
-## Clientes
+#Clientes
 
 Todos os clientes de demonstração usam a senha `Cliente@123`.
 

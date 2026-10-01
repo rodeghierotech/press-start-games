@@ -2,27 +2,14 @@ import { Menu, X } from "lucide-react"
 import { useEffect, useState } from "react"
 import { Link, useLocation, useNavigate } from "react-router-dom"
 import pressStartLogo from "../../assets/press-start-logo.png"
+import { sessaoAdmin, sessaoCliente } from "../../utils/sessao"
 
 function clienteSalvo() {
-  const sessao = localStorage.getItem("press-start-cliente") || sessionStorage.getItem("press-start-cliente")
-  if (!sessao) return null
-
-  try {
-    return JSON.parse(sessao) as { nome?: string }
-  } catch {
-    return null
-  }
+  return sessaoCliente()
 }
 
 function adminSalvo() {
-  const sessao = localStorage.getItem("press-start-admin") || sessionStorage.getItem("press-start-admin")
-  if (!sessao) return null
-
-  try {
-    return JSON.parse(sessao) as { nome?: string }
-  } catch {
-    return null
-  }
+  return sessaoAdmin()
 }
 
 export default function PressStartHeader() {
@@ -30,8 +17,8 @@ export default function PressStartHeader() {
   const navigate = useNavigate()
   const [open, setOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
-  const [cliente, setCliente] = useState<{ nome?: string } | null>(clienteSalvo)
-  const [admin, setAdmin] = useState<{ nome?: string } | null>(adminSalvo)
+  const [cliente, setCliente] = useState(clienteSalvo)
+  const [admin, setAdmin] = useState(adminSalvo)
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 10)
@@ -74,13 +61,13 @@ export default function PressStartHeader() {
           <span className="brand-font text-base font-semibold tracking-[0.02em] sm:text-lg">Press Start</span>
         </Link>
         <div className="hidden items-center gap-2 md:flex">
-          {admin?.nome ? <><span className="max-w-52 truncate rounded-lg border border-white/30 bg-white/10 px-3 py-2 text-sm font-semibold text-white" title={admin.nome}>{admin.nome}</span><Link to="/admin" className="rounded-lg bg-[#e86a17] px-3 py-2 text-sm font-bold text-white hover:bg-[#c65310]">Painel admin</Link><button type="button" onClick={sairCliente} className="rounded-lg border border-white/50 px-3 py-2 text-sm font-semibold text-white hover:border-orange-300 hover:text-orange-200">Sair</button></> : cliente?.nome ? <><span className="max-w-52 truncate rounded-lg border border-white/30 bg-white/10 px-3 py-2 text-sm font-semibold text-white" title={cliente.nome}>{cliente.nome}</span><button type="button" onClick={sairCliente} className="rounded-lg border border-white/50 px-3 py-2 text-sm font-semibold text-white hover:border-orange-300 hover:text-orange-200">Sair</button></> : <><Link to="/login" className="rounded-lg border border-white/50 bg-[#14213d] px-3 py-2 text-sm font-semibold text-white hover:border-white hover:bg-[#0f4c5c]">Login</Link><Link to="/cadastro" className="rounded-lg bg-[#e86a17] px-3 py-2 text-sm font-bold text-white hover:bg-[#c65310]">Cadastre-se</Link></>}
+          {admin?.nome ? <><span className="max-w-52 truncate rounded-lg border border-white/30 bg-white/10 px-3 py-2 text-sm font-semibold text-white" title={admin.nome}>{admin.nome}</span><Link to="/admin" className="rounded-lg bg-[#e86a17] px-3 py-2 text-sm font-bold text-white hover:bg-[#c65310]">Painel admin</Link><button type="button" onClick={sairCliente} className="rounded-lg border border-white/50 px-3 py-2 text-sm font-semibold text-white hover:border-orange-300 hover:text-orange-200">Sair</button></> : cliente?.nome ? <><span className="max-w-52 truncate rounded-lg border border-white/30 bg-white/10 px-3 py-2 text-sm font-semibold text-white" title={cliente.nome}>{cliente.nome}</span><Link to="/minha-conta" className="rounded-lg border border-orange-300/70 px-3 py-2 text-sm font-semibold text-orange-100 hover:border-orange-300 hover:bg-orange-500 hover:text-white">Minha conta</Link><button type="button" onClick={sairCliente} className="rounded-lg border border-white/50 px-3 py-2 text-sm font-semibold text-white hover:border-orange-300 hover:text-orange-200">Sair</button></> : <><Link to="/login" className="rounded-lg border border-white/50 bg-[#14213d] px-3 py-2 text-sm font-semibold text-white hover:border-white hover:bg-[#0f4c5c]">Login</Link><Link to="/cadastro" className="rounded-lg bg-[#e86a17] px-3 py-2 text-sm font-bold text-white hover:bg-[#c65310]">Cadastre-se</Link></>}
         </div>
         <button type="button" onClick={() => setOpen(!open)} className="grid h-10 w-10 place-items-center rounded-lg border border-white/50 bg-[#14213d] text-white transition-colors hover:border-white hover:bg-[#0f4c5c] md:hidden" aria-expanded={open} aria-controls="mobile-menu" aria-label={open ? "Fechar menu" : "Abrir menu"}>
           {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
         </button>
       </nav>
-      {open && <div id="mobile-menu" className="border-t border-white/10 bg-[#14213d] px-4 py-4 shadow-xl md:hidden"><div className="mx-auto max-w-7xl">{admin?.nome ? <div className="grid gap-2"><p className="rounded-lg border border-white/30 bg-white/10 px-3 py-3 text-center text-sm font-semibold text-white">{admin.nome}</p><Link to="/admin" onClick={() => setOpen(false)} className="rounded-lg bg-[#e86a17] px-3 py-3 text-center text-sm font-bold text-white transition-colors hover:bg-[#c65310]">Painel admin</Link><button type="button" onClick={sairCliente} className="rounded-lg border border-white/50 px-3 py-3 text-center text-sm font-semibold text-white hover:border-orange-300 hover:text-orange-200">Sair</button></div> : cliente?.nome ? <div className="grid gap-2"><p className="rounded-lg border border-white/30 bg-white/10 px-3 py-3 text-center text-sm font-semibold text-white">{cliente.nome}</p><button type="button" onClick={sairCliente} className="rounded-lg border border-white/50 px-3 py-3 text-center text-sm font-semibold text-white hover:border-orange-300 hover:text-orange-200">Sair</button></div> : <div className="grid grid-cols-2 gap-2"><Link to="/login" onClick={() => setOpen(false)} className="rounded-lg border border-white/50 px-3 py-3 text-center text-sm font-semibold text-white transition-colors hover:border-white hover:bg-[#0f4c5c]">Login</Link><Link to="/cadastro" onClick={() => setOpen(false)} className="rounded-lg bg-[#e86a17] px-3 py-3 text-center text-sm font-bold text-white transition-colors hover:bg-[#c65310]">Cadastre-se</Link></div>}</div></div>}
+      {open && <div id="mobile-menu" className="border-t border-white/10 bg-[#14213d] px-4 py-4 shadow-xl md:hidden"><div className="mx-auto max-w-7xl">{admin?.nome ? <div className="grid gap-2"><p className="rounded-lg border border-white/30 bg-white/10 px-3 py-3 text-center text-sm font-semibold text-white">{admin.nome}</p><Link to="/admin" onClick={() => setOpen(false)} className="rounded-lg bg-[#e86a17] px-3 py-3 text-center text-sm font-bold text-white transition-colors hover:bg-[#c65310]">Painel admin</Link><button type="button" onClick={sairCliente} className="rounded-lg border border-white/50 px-3 py-3 text-center text-sm font-semibold text-white hover:border-orange-300 hover:text-orange-200">Sair</button></div> : cliente?.nome ? <div className="grid gap-2"><p className="rounded-lg border border-white/30 bg-white/10 px-3 py-3 text-center text-sm font-semibold text-white">{cliente.nome}</p><Link to="/minha-conta" onClick={() => setOpen(false)} className="rounded-lg border border-orange-300/70 px-3 py-3 text-center text-sm font-semibold text-orange-100 hover:border-orange-300 hover:bg-orange-500 hover:text-white">Minha conta</Link><button type="button" onClick={sairCliente} className="rounded-lg border border-white/50 px-3 py-3 text-center text-sm font-semibold text-white hover:border-orange-300 hover:text-orange-200">Sair</button></div> : <div className="grid grid-cols-2 gap-2"><Link to="/login" onClick={() => setOpen(false)} className="rounded-lg border border-white/50 px-3 py-3 text-center text-sm font-semibold text-white transition-colors hover:border-white hover:bg-[#0f4c5c]">Login</Link><Link to="/cadastro" onClick={() => setOpen(false)} className="rounded-lg bg-[#e86a17] px-3 py-3 text-center text-sm font-bold text-white transition-colors hover:bg-[#c65310]">Cadastre-se</Link></div>}</div></div>}
     </header>
   )
 }

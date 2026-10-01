@@ -1,11 +1,11 @@
 import { prisma } from "../../lib/prisma"
+import { autenticar, exigirAdmin, exigirCliente } from "../middlewares/auth"
 import { Router } from "express"
 import { z } from "zod"
 
 const router = Router()
 
 const vendaSchema = z.object({
-  id_cliente: z.coerce.number().int(),
   forma_pagamento: z.string().min(2),
   itens: z.array(z.object({
     id_jogo: z.coerce.number().int(),
@@ -13,7 +13,7 @@ const vendaSchema = z.object({
   })).min(1),
 })
 
-router.get("/", async (req, res) => {
+router.get("/", autenticar, exigirAdmin, async (req, res) => {
   try {
     const vendas = await prisma.venda.findMany({
       include: {
@@ -30,7 +30,7 @@ router.get("/", async (req, res) => {
   }
 })
 
-router.post("/", async (req, res) => {
+router.post("/", autenticar, exigirCliente, async (req, res) => {
   const valida = vendaSchema.safeParse(req.body)
   if (!valida.success) {
     res.status(400).json({ erro: valida.error })
@@ -71,7 +71,7 @@ router.post("/", async (req, res) => {
 
       const vendaCriada = await tx.venda.create({
         data: {
-          id_cliente: valida.data.id_cliente,
+          id_cliente: req.usuario!.id,
           forma_pagamento: valida.data.forma_pagamento,
           valor_total: valorTotal,
           itens: {

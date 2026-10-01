@@ -53,6 +53,7 @@ async function main() {
       estoque: 10,
       plataforma: "PlayStation 5",
       data_lancamento: new Date("2022-03-15T00:00:00.000Z"),
+      destaque: true,
       id_categoria: acao.id_categoria,
     },
     {
@@ -62,6 +63,7 @@ async function main() {
       estoque: 7,
       plataforma: "PlayStation 5",
       data_lancamento: new Date("2018-10-26T00:00:00.000Z"),
+      destaque: true,
       id_categoria: acao.id_categoria,
     },
     {
@@ -71,6 +73,7 @@ async function main() {
       estoque: 12,
       plataforma: "PC",
       data_lancamento: new Date("2020-12-10T00:00:00.000Z"),
+      destaque: true,
       id_categoria: acao.id_categoria,
     },
     {

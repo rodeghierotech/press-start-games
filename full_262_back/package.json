@@ -5,7 +5,8 @@
   "scripts": {
     "dev": "npx tsx watch src/server.ts",
     "db:test": "tsx scripts/test-db.ts",
-    "seed": "prisma generate && tsx prisma/seed.ts"
+    "seed": "prisma generate && tsx prisma/seed.ts",
+    "test": "node --import tsx --test scripts/*.test.mjs"
   },
   "keywords": [],
   "author": "",

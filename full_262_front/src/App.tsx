@@ -21,13 +21,14 @@ async function leLista<T>(response: Response, recurso: string): Promise<T[]> {
 export default function App() {
   const [jogos, setJogos] = useState<JogoType[]>([])
   const [termo, setTermo] = useState("")
+  const [somenteDestaques, setSomenteDestaques] = useState(false)
   const [preferenciaIa, setPreferenciaIa] = useState("")
   const [sugestaoIa, setSugestaoIa] = useState("")
   const [carregandoIa, setCarregandoIa] = useState(false)
 
-  async function carregaDados() {
+  async function carregaDados(exibirDestaques = false) {
     try {
-      const resJogos = await fetch(`${apiUrl}/jogos`)
+      const resJogos = await fetch(`${apiUrl}/jogos${exibirDestaques ? "?destaques=true" : ""}`)
       const listaJogos = await leLista<JogoType>(resJogos, "os jogos")
       setJogos(listaJogos)
     } catch {
@@ -39,6 +40,12 @@ export default function App() {
   useEffect(() => {
     carregaDados()
   }, [])
+
+  function alternaDestaques() {
+    const proximoValor = !somenteDestaques
+    setSomenteDestaques(proximoValor)
+    carregaDados(proximoValor)
+  }
 
   const jogosFiltrados = useMemo(() => {
     const busca = termo.trim().toLowerCase()
@@ -96,7 +103,7 @@ export default function App() {
               <h2 className="text-xl font-bold text-white">Catálogo de jogos</h2>
               <p className="mt-1 text-sm text-slate-300">{jogosFiltrados.length} jogos disponíveis</p>
             </div>
-            <div className="w-full sm:max-w-md"><AnimatedSearchBar value={termo} onChange={setTermo} /></div>
+            <div className="flex w-full flex-col gap-2 sm:max-w-xl sm:flex-row sm:items-center"><div className="w-full sm:flex-1"><AnimatedSearchBar value={termo} onChange={setTermo} /></div><button type="button" onClick={alternaDestaques} className="shrink-0 rounded-lg border border-orange-300/60 bg-slate-900/70 px-4 py-3 text-sm font-semibold text-orange-100 transition-colors hover:border-orange-300 hover:bg-orange-500 hover:text-white">{somenteDestaques ? "Exibir todos os jogos" : "Exibir destaques"}</button></div>
           </div>
           <div className="mt-5"><GameGrid jogos={jogosFiltrados} /></div>
         </section>

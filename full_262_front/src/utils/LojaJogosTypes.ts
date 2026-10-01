@@ -16,6 +16,15 @@ export type AvaliacaoType = {
   comentario?: string | null
   data_avaliacao: string
   cliente: ClienteType
+  jogo?: Pick<JogoType, "nome">
+  resposta?: RespostaAvaliacaoType | null
+}
+
+export type RespostaAvaliacaoType = {
+  id_resposta: number
+  mensagem: string
+  data_resposta: string
+  admin: Pick<{ id_admin: number; nome: string }, "id_admin" | "nome">
 }
 
 export type JogoType = {
@@ -26,6 +35,7 @@ export type JogoType = {
   estoque: number
   plataforma: string
   data_lancamento: string
+  destaque: boolean
   id_categoria: number
   categoria: CategoriaType
   avaliacoes?: AvaliacaoType[]
