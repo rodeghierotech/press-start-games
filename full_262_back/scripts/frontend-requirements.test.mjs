@@ -20,7 +20,7 @@ test("frontend offers featured games and the authenticated account route", async
   ])
 
   assert.match(app, /destaques=true/)
-  assert.match(app, /Exibir destaques/)
+  assert.match(app, /Ver somente destaques/)
   assert.match(routes, /path: "minha-conta"/)
   assert.match(session, /sessao_id/)
   assert.match(account, /clientes\/me\/interacoes/)

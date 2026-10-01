@@ -58,6 +58,8 @@ export default function App() {
     )
   }, [jogos, termo])
 
+  const jogosDestaque = useMemo(() => jogos.filter(jogo => jogo.destaque), [jogos])
+
   async function consultaIa() {
     if (preferenciaIa.trim().length < 8) {
       toast.error("Descreva brevemente o tipo de jogo que você procura")
@@ -97,13 +99,24 @@ export default function App() {
           <p className="mt-3 text-base leading-7 text-slate-300">Explore nosso catálogo e descubra novos jogos para jogar.</p>
         </section>
 
+        {!somenteDestaques && jogosDestaque.length > 0 && <section className="mt-10" aria-labelledby="titulo-destaques">
+          <div className="flex flex-wrap items-end justify-between gap-3">
+            <div>
+              <p className="text-xs font-bold uppercase tracking-[0.16em] text-orange-300">Seleção Press Start</p>
+              <h2 id="titulo-destaques" className="mt-2 text-2xl font-bold text-white">Jogos em destaque</h2>
+            </div>
+            <p className="text-sm text-slate-300">{jogosDestaque.length} jogos selecionados</p>
+          </div>
+          <div className="mt-5"><GameGrid jogos={jogosDestaque} /></div>
+        </section>}
+
         <section id="catalogo" className="mt-8">
           <div className="flex flex-wrap items-end justify-between gap-3">
             <div>
-              <h2 className="text-xl font-bold text-white">Catálogo de jogos</h2>
+              <h2 className="text-xl font-bold text-white">{somenteDestaques ? "Jogos em destaque" : "Todos os jogos"}</h2>
               <p className="mt-1 text-sm text-slate-300">{jogosFiltrados.length} jogos disponíveis</p>
             </div>
-            <div className="flex w-full flex-col gap-2 sm:max-w-xl sm:flex-row sm:items-center"><div className="w-full sm:flex-1"><AnimatedSearchBar value={termo} onChange={setTermo} /></div><button type="button" onClick={alternaDestaques} className="shrink-0 rounded-lg border border-orange-300/60 bg-slate-900/70 px-4 py-3 text-sm font-semibold text-orange-100 transition-colors hover:border-orange-300 hover:bg-orange-500 hover:text-white">{somenteDestaques ? "Exibir todos os jogos" : "Exibir destaques"}</button></div>
+            <div className="flex w-full flex-col gap-2 sm:max-w-xl sm:flex-row sm:items-center"><div className="w-full sm:flex-1"><AnimatedSearchBar value={termo} onChange={setTermo} /></div><button type="button" onClick={alternaDestaques} className="shrink-0 rounded-lg border border-orange-300/60 bg-slate-900/70 px-4 py-3 text-sm font-semibold text-orange-100 transition-colors hover:border-orange-300 hover:bg-orange-500 hover:text-white">{somenteDestaques ? "Exibir todos os jogos" : "Ver somente destaques"}</button></div>
           </div>
           <div className="mt-5"><GameGrid jogos={jogosFiltrados} /></div>
         </section>
